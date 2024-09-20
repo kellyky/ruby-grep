@@ -2,6 +2,7 @@ require 'minitest/autorun'
 require_relative 'grep'
 
 class GrepTest < Minitest::Test
+  def skip; end
   def setup
     IO.write 'iliad.txt', <<~ILIAD
       Achilles sing, O Goddess! Peleus' son;
