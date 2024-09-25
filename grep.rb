@@ -20,15 +20,10 @@ class Grep
   private_constant :FLAGS
 
   def self.grep(pattern, flags, files)
+    # Sets up the 'environment' for correct matching
     new_grepper = new(flags, pattern, files.count > 1)
 
-    file_matches = []
-    files.each do |file|
-      file_match = new_grepper.grep(file)
-      file_matches << file_match unless file_match.empty?
-    end
-
-    file_matches.join("\n")
+    files.map { |file| new_grepper.grep(file) }.reject(&:empty?).join("\n")
   end
 
   private
@@ -44,7 +39,6 @@ class Grep
 
   def initialize(flags, raw_pattern, multiple_files)
     @file_name_needed = multiple_files
-
     self.pattern = raw_pattern
 
     # Toggle flags, update pattern if needed
