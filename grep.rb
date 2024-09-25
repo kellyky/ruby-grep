@@ -1,4 +1,3 @@
-
 # Given a pattern (string), flags (array) and files (array), return the specififed match.
 # What each flag means:
 #   -n  Prepend line number and colon `:` to each line in the output, placing the number AFTER the filename (if present)
@@ -20,7 +19,6 @@ class Grep
   private_constant :FLAGS
 
   def self.grep(pattern, flags, files)
-    # Sets up the 'environment' for correct matching
     new_grepper = new(flags, pattern, files.count > 1)
 
     files.map { |file| new_grepper.grep(file) }.reject(&:empty?).join("\n")
@@ -60,6 +58,10 @@ class Grep
                    end
   end
 
+  def match_pattern?(line)
+    invert_match ? !line.match?(pattern) : line.match?(pattern)
+  end
+
   def file_name(file)
     file_name_needed and "#{file}:" or ''
   end
@@ -80,24 +82,20 @@ class Grep
   attr_accessor :file
 
   def grep(file)
-    matched_lines = []
-    unmatched_lines = []
+    lines = []
 
-    file_lines = File.open(file).readlines.map(&:chomp)
+    file_lines = File.open(file).readlines(chomp: true)
 
     file_lines.each_with_index do |line, i|
-      lines = line.match?(pattern) ? matched_lines : unmatched_lines
+      next unless match_pattern?(line)
 
-      text = if file_name_only
-               lines.include?(file) and next or file
-             else
-               file_name(file) + line_number(i + 1) + line
-             end
-
-      lines << text
+      lines << if file_name_only
+                 lines.include?(file) and next or file
+               else
+                 file_name(file) + line_number(i + 1) + line
+               end
     end
 
-    lines = invert_match ? unmatched_lines : matched_lines
     lines.join("\n")
   end
 
