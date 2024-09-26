@@ -58,16 +58,18 @@ class Grep
                    end
   end
 
+  def file_lines(file)
+    File.open(file).readlines(chomp: true)
+  end
+
   def match_pattern?(line)
     invert_match ? !line.match?(pattern) : line.match?(pattern)
   end
 
-  def file_name(file)
-    file_name_needed and "#{file}:" or ''
-  end
-
-  def line_number(number)
-    line_number_needed and "#{number}:" or ''
+  def format_line(file, number, line)
+    file_name = file_name_needed ? "#{file}:" : ''
+    line_number = line_number_needed ? "#{number}:" : ''
+    file_name + line_number + line
   end
 
   public
@@ -81,22 +83,18 @@ class Grep
 
   attr_accessor :file
 
-  def grep(file)
-    lines = []
-
-    file_lines = File.open(file).readlines(chomp: true)
-
-    file_lines.each_with_index do |line, i|
+  def grep(file_name)
+    file_lines(file_name).each_with_object([]).with_index do |(line, lines), i|
       next unless match_pattern?(line)
 
       lines << if file_name_only
-                 lines.include?(file) and next or file
-               else
-                 file_name(file) + line_number(i + 1) + line
-               end
-    end
+                 next if lines.include?(file_name)
 
-    lines.join("\n")
+                 file_name
+               else
+                 format_line(file_name, i + 1, line)
+               end
+    end.join("\n")
   end
 
 end
