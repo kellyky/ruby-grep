@@ -54,7 +54,7 @@ class Grep
     self.pattern = if case_insensitive
                      /#{pattern}/i
                    elsif complete_line_match
-                     /\A#{pattern}\z/
+                     /^#{pattern}$/
                    end
   end
 
@@ -62,7 +62,7 @@ class Grep
     File.open(file).readlines(chomp: true)
   end
 
-  def match_pattern?(line)
+  def matches_pattern?(line)
     invert_match ? !line.match?(pattern) : line.match?(pattern)
   end
 
@@ -85,7 +85,7 @@ class Grep
 
   def grep(file_name)
     file_lines(file_name).each_with_object([]).with_index do |(line, lines), i|
-      next unless match_pattern?(line)
+      next unless matches_pattern?(line)
 
       lines << if file_name_only
                  next if lines.include?(file_name)
