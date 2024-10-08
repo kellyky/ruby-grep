@@ -1,11 +1,3 @@
-# Given a pattern (string), flags (array) and files (array), return the specififed match.
-# What each flag means:
-#   -n  Prepend line number and colon `:` to each line in the output, placing the number AFTER the filename (if present)
-#   -l  Output only names of files that contain at least one matching line
-#   -i  Match line using case-insensitive comparison
-#   -v  Return all lines that *fail* to match. Like an invert
-#   -x  Search only for lines where search string ('pattern') matches the entire line
-
 class Grep
 
   FLAGS = {
@@ -35,12 +27,15 @@ class Grep
               :invert_match,
               :complete_line_match
 
-  alias case_insensitive? case_insensitive
-  alias line_number_needed? line_number_needed
-  alias file_name_only? file_name_only
-  alias invert_match? invert_match
-  alias complete_line_match? complete_line_match
-  alias file_name_needed? file_name_needed
+  %i[
+    case_insensitive
+    line_number_needed
+    file_name_only
+    invert_match
+    complete_line_match
+    file_name_needed
+  ].each { |attr| define_method("#{attr}?") { send(attr) } }
+
 
   def initialize(flags, raw_pattern, multiple_files)
     @file_name_needed = multiple_files
